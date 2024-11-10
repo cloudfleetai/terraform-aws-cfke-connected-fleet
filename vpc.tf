@@ -19,7 +19,7 @@ data "aws_regions" "all" {
 data "aws_regions" "not_opted_in" {
   all_regions = false
   filter {
-    name = "opt-in-status"
+    name   = "opt-in-status"
     values = ["not-opted-in"]
   }
 }
@@ -28,7 +28,7 @@ data "aws_regions" "not_opted_in" {
 data "aws_iam_policy_document" "AWSCloudFormationStackSetAdministrationRole_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
-    effect = "Allow"
+    effect  = "Allow"
 
     principals {
       identifiers = concat(
@@ -54,11 +54,11 @@ resource "aws_iam_role" "AWSCloudFormationStackSetAdministrationRole" {
 data "aws_iam_policy_document" "AWSCloudFormationStackSetExecutionRole_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
-    effect = "Allow"
+    effect  = "Allow"
 
     principals {
       identifiers = [aws_iam_role.AWSCloudFormationStackSetAdministrationRole.arn]
-      type = "AWS"
+      type        = "AWS"
     }
   }
 }
@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "AWSCloudFormationStackSetExecutionRole_MinimumEx
     actions = [
       "cloudformation:*",
     ]
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
   }
 
@@ -171,8 +171,8 @@ resource "aws_cloudformation_stack_set" "cfke-vpc" {
 }
 
 resource "aws_cloudformation_stack_set_instance" "cfke-vpc" {
-  depends_on = [aws_iam_role_policy.AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy]
-  for_each = toset(data.aws_regions.all.names)
+  depends_on     = [aws_iam_role_policy.AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy]
+  for_each       = toset(data.aws_regions.all.names)
   stack_set_name = aws_cloudformation_stack_set.cfke-vpc.name
   region         = each.key
   operation_preferences {

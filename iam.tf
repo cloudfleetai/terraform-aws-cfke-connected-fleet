@@ -9,7 +9,7 @@ locals {
 data "aws_iam_policy_document" "trust_policy" {
   statement {
     actions = ["sts:AssumeRole"]
-    effect = "Allow"
+    effect  = "Allow"
     principals {
       type = "AWS"
       identifiers = [
@@ -51,12 +51,12 @@ data "aws_iam_policy_document" "control-plane-policy" {
     condition {
       test     = "StringEquals"
       variable = "aws:RequestTag/cfke-managed-by"
-      values = ["cfke"]
+      values   = ["cfke"]
     }
     condition {
       test     = "StringEquals"
       variable = "aws:RequestTag/cfke-cluster-id"
-      values = [var.cluster_id]
+      values   = [var.cluster_id]
     }
   }
 
@@ -75,17 +75,17 @@ data "aws_iam_policy_document" "control-plane-policy" {
     condition {
       test     = "StringEquals"
       variable = "aws:RequestTag/cfke-managed-by"
-      values = ["cfke"]
+      values   = ["cfke"]
     }
     condition {
       test     = "StringEquals"
       variable = "aws:RequestTag/cfke-cluster-id"
-      values = [var.cluster_id]
+      values   = [var.cluster_id]
     }
     condition {
       test     = "StringEquals"
       variable = "ec2:CreateAction"
-      values = ["RunInstances"]
+      values   = ["RunInstances"]
     }
   }
 
@@ -101,12 +101,12 @@ data "aws_iam_policy_document" "control-plane-policy" {
     condition {
       test     = "StringEquals"
       variable = "aws:ResourceTag/cfke-managed-by"
-      values = ["cfke"]
+      values   = ["cfke"]
     }
     condition {
       test     = "StringEquals"
       variable = "aws:ResourceTag/cfke-cluster-id"
-      values = [var.cluster_id]
+      values   = [var.cluster_id]
     }
   }
 
@@ -122,12 +122,12 @@ data "aws_iam_policy_document" "control-plane-policy" {
     condition {
       test     = "StringEquals"
       variable = "aws:ResourceTag/cfke-managed-by"
-      values = ["cfke"]
+      values   = ["cfke"]
     }
     condition {
       test     = "StringEquals"
       variable = "aws:ResourceTag/cfke-cluster-id"
-      values = [var.cluster_id]
+      values   = [var.cluster_id]
     }
   }
 
@@ -149,18 +149,18 @@ data "aws_iam_policy_document" "control-plane-policy" {
 
 resource "aws_iam_policy" "cfke-controller" {
   policy = data.aws_iam_policy_document.control-plane-policy.json
-  name = "CFKEController-${var.cluster_id}"
-  tags = local.tags
+  name   = "CFKEController-${var.cluster_id}"
+  tags   = local.tags
 }
 
 resource "aws_iam_role" "cfke-controller" {
   name               = "CFKEController-${var.cluster_id}"
   assume_role_policy = data.aws_iam_policy_document.trust_policy.json
-  tags = local.tags
+  tags               = local.tags
 }
 
 resource "aws_iam_policy_attachment" "cfke-controller" {
   policy_arn = aws_iam_policy.cfke-controller.arn
-  roles = [aws_iam_role.cfke-controller.name]
-  name = "CFKEController-${var.cluster_id}"
+  roles      = [aws_iam_role.cfke-controller.name]
+  name       = "CFKEController-${var.cluster_id}"
 }
