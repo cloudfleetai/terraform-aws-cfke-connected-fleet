@@ -4,9 +4,12 @@ output:
   mode: inject
 
 sections:
-  hide:
-    - resources
-    - modules
+  show:
+    - header
+    - providers
+    - inputs
+    - outputs
+    - footer
 
 header-from: docs/.header.md
 footer-from: docs/.footer.md

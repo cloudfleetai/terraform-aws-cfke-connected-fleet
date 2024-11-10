@@ -1,41 +1,26 @@
 <!-- BEGIN_TF_DOCS -->
 # CFKE Connected Fleet for AWS
 
+This module installs the required IAM roles and policies, and sets up the VPC for the CFKE controller to manage the cluster.
+
+VPCs are created in all the enabled regions of the AWS account.
+
 ## Example usage
 
-````terraform
-module "vpn" {
-
-  source    = "registry.terraform.io/cloudfleetai/cfke-connected-fleet/aws"
-  version   = "1.0.0"
+```terraform
+module "cfke_connected_fleet" {
+  source               = "registry.terraform.io/cloudfleetai/cfke-connected-fleet/aws"
+  version              = "1.0.0"
+  control_plane_region = "northamerica-central-1"
+  cluster_id           = "ea4ba2ac-3262-4c51-9a08-e13c98e50aab"
 }
-````
-
-`
-
-## Requirements
-
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+```
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.75.0 |
-
-## Resources
-
-| Name | Type |
-|------|------|
-| [aws_iam_policy_document.AWSCloudFormationStackSetAdministrationRole_assume_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.AWSCloudFormationStackSetExecutionRole_assume_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.control-plane-policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.trust_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_regions.all](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/regions) | data source |
-| [aws_regions.not_opted_in](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/regions) | data source |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5 |
 
 ## Inputs
 
@@ -47,7 +32,9 @@ module "vpn" {
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_fleet_arn"></a> [fleet\_arn](#output\_fleet\_arn) | The ARN of the IAM role for the CFKE controller. Use this when you create the Fleet for the cluster |
 
 ## License
 
