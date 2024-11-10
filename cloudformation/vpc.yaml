@@ -1,0 +1,283 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This template creates a VPC infrastructure public subnets for each Availability Zone.
+Metadata:
+  LICENSE: Apache License, Version 2.0
+
+Mappings:
+  Regions:
+    ap-south-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "aps1-az1", "aps1-az2", "aps1-az3" ]
+    eu-north-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "eun1-az1", "eun1-az2", "eun1-az3" ]
+    eu-west-3:
+      NumberOfAZs: 3
+      ZoneIds: [ "euw3-az1", "euw3-az2", "euw3-az3" ]
+    eu-west-2:
+      NumberOfAZs: 3
+      ZoneIds: [ "euw2-az1", "euw2-az2", "euw2-az3" ]
+    eu-west-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "euw1-az1", "euw1-az2", "euw1-az3" ]
+    ap-northeast-3:
+      NumberOfAZs: 3
+      ZoneIds: [ "apne3-az1", "apne3-az2", "apne3-az3" ]
+    ap-northeast-2:
+      NumberOfAZs: 4
+      ZoneIds: [ "apne2-az1", "apne2-az2", "apne2-az3", "apne2-az4" ]
+    ap-northeast-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "apne1-az1", "apne1-az2", "apne1-az4" ]
+    ca-central-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "cac1-az1", "cac1-az2", "cac1-az4" ]
+    ca-west-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "caw1-az1", "caw1-az2", "caw1-az3" ]
+    sa-east-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "sae1-az1", "sae1-az2", "sae1-az3" ]
+    ap-southeast-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "apse1-az1", "apse1-az2", "apse1-az3" ]
+    ap-southeast-2:
+      NumberOfAZs: 3
+      ZoneIds: [ "apse2-az1", "apse2-az2", "apse2-az3" ]
+    ap-southeast-3:
+      NumberOfAZs: 3
+      ZoneIds: [ "apse3-az1", "apse3-az2", "apse3-az3" ]
+    ap-southeast-4:
+      NumberOfAZs: 3
+      ZoneIds: [ "apse4-az1", "apse4-az2", "apse4-az3" ]
+    ap-southeast-5:
+      NumberOfAZs: 3
+      ZoneIds: [ "apse5-az1", "apse5-az2", "apse5-az3" ]
+    ap-south-2:
+      NumberOfAZs: 3
+      ZoneIds: [ "aps2-az1", "aps2-az2", "aps2-az3" ]
+    ap-east-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "ape1-az1", "ape1-az2", "ape1-az3" ]
+    af-south-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "afs1-az1", "afs1-az2", "afs1-az3" ]
+    eu-central-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "euc1-az1", "euc1-az2", "euc1-az3" ]
+    eu-central-2:
+      NumberOfAZs: 3
+      ZoneIds: [ "euc2-az1", "euc2-az2", "euc2-az3" ]
+    us-east-1:
+      NumberOfAZs: 6
+      ZoneIds: [ "use1-az1", "use1-az2", "use1-az3", "use1-az4", "use1-az5", "use1-az6", ]
+    us-east-2:
+      NumberOfAZs: 3
+      ZoneIds: [ "use2-az1", "use2-az2", "use2-az3" ]
+    us-west-1:
+      NumberOfAZs: 2
+      ZoneIds: [ "usw1-az1", "usw1-az3" ]
+    us-west-2:
+      NumberOfAZs: 4
+      ZoneIds: [ "usw2-az1", "usw2-az2", "usw2-az3", "usw2-az4" ]
+    me-south-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "mes1-az1", "mes1-az2", "mes1-az3" ]
+    me-central-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "mec1-az1", "mec1-az2", "mec1-az3" ]
+    il-central-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "ilc1-az1", "ilc1-az2", "ilc1-az3" ]
+    eu-south-1:
+      NumberOfAZs: 3
+      ZoneIds: [ "eus1-az1", "eus1-az2", "eus1-az3" ]
+    eu-south-2:
+      NumberOfAZs: 3
+      ZoneIds: [ "eus2-az1", "eus2-az2", "eus2-az3" ]
+
+Parameters:
+  ClusterId:
+    Type: String
+    Description: Cloudfleet Cluster ID
+
+  VPCCidr:
+    Type: String
+    Description: CIDR block for the VPC
+    Default: 10.0.0.0/16
+
+  SubnetNetMask:
+    Type: Number
+    Description: The number of subnet bits for each subnet's CIDR. For example, specifying a value "8" for this parameter will create a CIDR with a mask of "/24".
+    Default: 13
+
+Conditions:
+  3AZCondition: !Or
+    - !Equals [ !FindInMap [ Regions, !Ref "AWS::Region", NumberOfAZs ], "3" ]
+    - !Condition 4AZCondition
+  4AZCondition: !Or
+    - !Equals [ !FindInMap [ Regions, !Ref "AWS::Region", NumberOfAZs ], "4" ]
+    - !Condition 5AZCondition
+  5AZCondition: !Or
+    - !Equals [ !FindInMap [ Regions, !Ref "AWS::Region", NumberOfAZs ], "5" ]
+    - !Condition 6AZCondition
+  6AZCondition:
+    !Equals [ !FindInMap [ Regions, !Ref "AWS::Region", NumberOfAZs ], "6" ]
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  CloudfleetNodeSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group applied to ENI of Cloudfleet managed workloads.
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select
+        - 0
+        - !Cidr [ !Ref VPCCidr, 6, !Ref SubnetNetMask ]
+      AvailabilityZoneId:
+        !Select [ 0, !FindInMap [ Regions, !Ref "AWS::Region", ZoneIds ] ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: CFKE
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select
+        - 1
+        - !Cidr [ !Ref VPCCidr, 6, !Ref SubnetNetMask ]
+      AvailabilityZoneId:
+        !Select [ 1, !FindInMap [ Regions, !Ref "AWS::Region", ZoneIds ] ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: CFKE
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Condition: 3AZCondition
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select
+        - 2
+        - !Cidr [ !Ref VPCCidr, 6, !Ref SubnetNetMask ]
+      AvailabilityZoneId:
+        !Select [ 2, !FindInMap [ Regions, !Ref "AWS::Region", ZoneIds ] ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: CFKE
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  PublicSubnet4:
+    Type: AWS::EC2::Subnet
+    Condition: 4AZCondition
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select
+        - 3
+        - !Cidr [ !Ref VPCCidr, 6, !Ref SubnetNetMask ]
+      AvailabilityZoneId:
+        !Select [ 3, !FindInMap [ Regions, !Ref "AWS::Region", ZoneIds ] ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: CFKE
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  PublicSubnet5:
+    Type: AWS::EC2::Subnet
+    Condition: 5AZCondition
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select
+        - 4
+        - !Cidr [ !Ref VPCCidr, 6, !Ref SubnetNetMask ]
+      AvailabilityZoneId:
+        !Select [ 4, !FindInMap [ Regions, !Ref "AWS::Region", ZoneIds ] ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: CFKE
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
+
+  PublicSubnet6:
+    Type: AWS::EC2::Subnet
+    Condition: 6AZCondition
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Select
+        - 5
+        - !Cidr [ !Ref VPCCidr, 6, !Ref SubnetNetMask ]
+      AvailabilityZoneId:
+        !Select [ 5, !FindInMap [ Regions, !Ref "AWS::Region", ZoneIds ] ]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: CFKE
+        - Key: ManagedBy
+          Value: cfke
+        - Key: cfke-cluster-id
+          Value: !Ref ClusterId
