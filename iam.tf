@@ -1,7 +1,8 @@
 locals {
   cloudfleet_controller_aws_accounts = {
     "staging" : "891376988818"
-    "northamerica-central-1" : "891376988818"
+    "northamerica-central-1" : "891376988818",
+    "europe-central-1a": "891376988818"
   }
 }
 
