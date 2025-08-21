@@ -18,8 +18,14 @@ variable "vpc_cidr_block" {
 
 variable "create_spot_service_linked_role" {
   type        = bool
-  default = true
+  default     = true
   description = "Create the AWS Service Linked Role for Spot Instances. Set this to false if you are using an account that already has the role. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/service-linked-roles-spot-instance-requests.html for more information."
+}
+
+variable "attach_load_balancer_policy" {
+  type        = bool
+  default     = true
+  description = "Attach the load balancer management policy to the CFKE controller role. Set this to false if load balancer permissions are not needed."
 }
 
 locals {
