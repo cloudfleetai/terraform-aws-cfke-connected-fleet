@@ -165,7 +165,7 @@ resource "aws_iam_role_policy" "AWSCloudFormationStackSetExecutionRole_MinimumEx
 resource "aws_cloudformation_stack_set" "cfke-vpc" {
   administration_role_arn = aws_iam_role.AWSCloudFormationStackSetAdministrationRole.arn
   execution_role_name     = aws_iam_role.AWSCloudFormationStackSetExecutionRole.name
-  name                    = "cfke-vpc"
+  name                    = "cfke-vpc-${var.cluster_id}"
 
   parameters = {
     ClusterId     = var.cluster_id
@@ -179,7 +179,7 @@ resource "aws_cloudformation_stack_set" "cfke-vpc" {
   }
   operation_preferences {
     region_concurrency_type = "PARALLEL"
-    max_concurrent_count = 10
+    max_concurrent_count    = 10
   }
 }
 
