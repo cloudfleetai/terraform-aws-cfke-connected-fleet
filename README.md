@@ -38,6 +38,7 @@ Please see the [AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/Use
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_attach_load_balancer_policy"></a> [attach\_load\_balancer\_policy](#input\_attach\_load\_balancer\_policy) | Attach the load balancer management policy to the CFKE controller role. Set this to false if load balancer permissions are not needed. | `bool` | `true` | no |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | The Cluster ID | `string` | n/a | yes |
 | <a name="input_control_plane_region"></a> [control\_plane\_region](#input\_control\_plane\_region) | n/a | `string` | n/a | yes |
 | <a name="input_create_spot_service_linked_role"></a> [create\_spot\_service\_linked\_role](#input\_create\_spot\_service\_linked\_role) | Create the AWS Service Linked Role for Spot Instances. Set this to false if you are using an account that already has the role. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/service-linked-roles-spot-instance-requests.html for more information. | `bool` | `true` | no |
