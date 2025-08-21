@@ -1,7 +1,7 @@
 variable "control_plane_region" {
   type = string
   validation {
-    condition     = contains(["staging", "northamerica-central-1"], var.control_plane_region)
+    condition     = contains(["staging", "northamerica-central-1", "europe-central-1a"], var.control_plane_region)
     error_message = "The control plane region is not supported"
   }
 }
