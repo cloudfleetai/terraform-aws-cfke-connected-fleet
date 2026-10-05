@@ -3,24 +3,24 @@
 
 This module installs the required IAM roles and policies, and sets up the VPC for the CFKE controller to manage the cluster.
 
-VPCs are created in all the enabled regions of the AWS account.
+VPCs are created in all the enabled regions of the AWS account. To run the Fleet in networks you manage instead, set `create_vpc` to `false` and contact Cloudfleet support to set them up.
 
 ## Example usage
 
 ```terraform
 module "cfke_connected_fleet" {
   source               = "registry.terraform.io/cloudfleetai/cfke-connected-fleet/aws"
-  version              = "1.0.0"
-  control_plane_region = "northamerica-central-1"
-  cluster_id           = "ea4ba2ac-3262-4c51-9a08-e13c98e50aab"
+  version              = "~> 1"
+  control_plane_region = cloudfleet_cfke_cluster.example.region
+  cluster_id           = cloudfleet_cfke_cluster.example.id
 }
 ```
 
 ## Service Linked Role for Spot instances
 
-Unless your AWS account has already onboarded to EC2 Spot, you need to create the service linked role to avoid `ServiceLinkedRoleCreationNotPermitted` errors upon node provisioning. This module creates this role by default for you. However, if your account has already onboarded to EC2 Spot, you must disable creation of the role by setting `create_service_linked_role` to `false`.
+Unless your AWS account has already onboarded to EC2 Spot, you need to create the service linked role to avoid `ServiceLinkedRoleCreationNotPermitted` errors upon node provisioning. This module creates this role by default for you. However, if your account has already onboarded to EC2 Spot, you must disable creation of the role by setting `create_spot_service_linked_role` to `false`.
 
-You tell if this role exists if you see the following error message when you apply the module:
+You can tell that this role exists if you see the following error message when you apply the module:
 
 ```shell
 InvalidInput: Service role name AWSServiceRoleForEC2Spot has been taken in this account, please try a different suffix.
@@ -40,9 +40,10 @@ Please see the [AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/Use
 |------|-------------|------|---------|:--------:|
 | <a name="input_attach_load_balancer_policy"></a> [attach\_load\_balancer\_policy](#input\_attach\_load\_balancer\_policy) | Attach the load balancer management policy to the CFKE controller role. Set this to false if load balancer permissions are not needed. | `bool` | `true` | no |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | The Cluster ID | `string` | n/a | yes |
-| <a name="input_control_plane_region"></a> [control\_plane\_region](#input\_control\_plane\_region) | n/a | `string` | n/a | yes |
+| <a name="input_control_plane_region"></a> [control\_plane\_region](#input\_control\_plane\_region) | The CFKE control plane region of the cluster, as the Cloudfleet API and the Terraform provider report it (for example `europe-central-1a`) | `string` | n/a | yes |
 | <a name="input_create_spot_service_linked_role"></a> [create\_spot\_service\_linked\_role](#input\_create\_spot\_service\_linked\_role) | Create the AWS Service Linked Role for Spot Instances. Set this to false if you are using an account that already has the role. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/service-linked-roles-spot-instance-requests.html for more information. | `bool` | `true` | no |
-| <a name="input_vpc_cidr_block"></a> [vpc\_cidr\_block](#input\_vpc\_cidr\_block) | The CIDR block for the VPC | `string` | `"10.0.0.0/16"` | no |
+| <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Create a VPC for CFKE nodes in every enabled region of the account. Set this to false to run the Fleet in networks you manage; contact Cloudfleet support to set them up. | `bool` | `true` | no |
+| <a name="input_vpc_cidr_block"></a> [vpc\_cidr\_block](#input\_vpc\_cidr\_block) | The CIDR block for the VPC. Used only when create\_vpc is true. | `string` | `"10.0.0.0/16"` | no |
 
 ## Outputs
 

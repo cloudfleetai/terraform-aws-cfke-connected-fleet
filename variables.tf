@@ -1,7 +1,8 @@
 variable "control_plane_region" {
-  type = string
+  description = "The CFKE control plane region of the cluster, as the Cloudfleet API and the Terraform provider report it (for example `europe-central-1a`)"
+  type        = string
   validation {
-    condition     = contains(["staging", "northamerica-central-1", "europe-central-1a"], var.control_plane_region)
+    condition     = contains(["staging", "staging-1a", "northamerica-central-1", "northamerica-central-1a", "europe-central-1a"], var.control_plane_region)
     error_message = "The control plane region is not supported"
   }
 }
@@ -11,8 +12,14 @@ variable "cluster_id" {
   type        = string
 }
 
+variable "create_vpc" {
+  type        = bool
+  default     = true
+  description = "Create a VPC for CFKE nodes in every enabled region of the account. Set this to false to run the Fleet in networks you manage; contact Cloudfleet support to set them up."
+}
+
 variable "vpc_cidr_block" {
-  description = "The CIDR block for the VPC"
+  description = "The CIDR block for the VPC. Used only when create_vpc is true."
   default     = "10.0.0.0/16"
 }
 

@@ -4,6 +4,7 @@ StackSet is used for the actual VPC deployment as Terraform's multi regions supp
 */
 
 data "aws_regions" "all" {
+  count       = var.create_vpc ? 1 : 0
   all_regions = false
   /*
   filter {
@@ -17,6 +18,7 @@ data "aws_regions" "all" {
 }
 
 data "aws_regions" "not_opted_in" {
+  count       = var.create_vpc ? 1 : 0
   all_regions = false
   filter {
     name   = "opt-in-status"
@@ -26,6 +28,7 @@ data "aws_regions" "not_opted_in" {
 
 // StackSet Administration Role
 data "aws_iam_policy_document" "AWSCloudFormationStackSetAdministrationRole_assume_role_policy" {
+  count = var.create_vpc ? 1 : 0
   statement {
     actions = ["sts:AssumeRole"]
     effect  = "Allow"
@@ -35,7 +38,7 @@ data "aws_iam_policy_document" "AWSCloudFormationStackSetAdministrationRole_assu
         ["cloudformation.amazonaws.com"],
 
         # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-prereqs.html#stacksets-opt-in-regions
-        [for region in data.aws_regions.not_opted_in.names : "cloudformation.${region}.amazonaws.com"]
+        [for region in data.aws_regions.not_opted_in[0].names : "cloudformation.${region}.amazonaws.com"]
       )
       type = "Service"
     }
@@ -43,7 +46,8 @@ data "aws_iam_policy_document" "AWSCloudFormationStackSetAdministrationRole_assu
 }
 
 resource "aws_iam_role" "AWSCloudFormationStackSetAdministrationRole" {
-  assume_role_policy = data.aws_iam_policy_document.AWSCloudFormationStackSetAdministrationRole_assume_role_policy.json
+  count              = var.create_vpc ? 1 : 0
+  assume_role_policy = data.aws_iam_policy_document.AWSCloudFormationStackSetAdministrationRole_assume_role_policy[0].json
   name_prefix        = "CFKEStackSetAdministrationRole"
   tags               = local.tags
 
@@ -52,24 +56,27 @@ resource "aws_iam_role" "AWSCloudFormationStackSetAdministrationRole" {
 
 // Execution Role
 data "aws_iam_policy_document" "AWSCloudFormationStackSetExecutionRole_assume_role_policy" {
+  count = var.create_vpc ? 1 : 0
   statement {
     actions = ["sts:AssumeRole"]
     effect  = "Allow"
 
     principals {
-      identifiers = [aws_iam_role.AWSCloudFormationStackSetAdministrationRole.arn]
+      identifiers = [aws_iam_role.AWSCloudFormationStackSetAdministrationRole[0].arn]
       type        = "AWS"
     }
   }
 }
 
 resource "aws_iam_role" "AWSCloudFormationStackSetExecutionRole" {
-  assume_role_policy = data.aws_iam_policy_document.AWSCloudFormationStackSetExecutionRole_assume_role_policy.json
+  count              = var.create_vpc ? 1 : 0
+  assume_role_policy = data.aws_iam_policy_document.AWSCloudFormationStackSetExecutionRole_assume_role_policy[0].json
   name_prefix        = "CFKEStackSetExecutionRole-"
   tags               = local.tags
 }
 
 data "aws_iam_policy_document" "AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy" {
+  count = var.create_vpc ? 1 : 0
   statement {
     actions = [
       "cloudformation:*",
@@ -157,14 +164,16 @@ data "aws_iam_policy_document" "AWSCloudFormationStackSetExecutionRole_MinimumEx
 
 
 resource "aws_iam_role_policy" "AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy" {
+  count       = var.create_vpc ? 1 : 0
   name_prefix = "CFKEStackSetExecutionRole-"
-  policy      = data.aws_iam_policy_document.AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy.json
-  role        = aws_iam_role.AWSCloudFormationStackSetExecutionRole.name
+  policy      = data.aws_iam_policy_document.AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy[0].json
+  role        = aws_iam_role.AWSCloudFormationStackSetExecutionRole[0].name
 }
 
 resource "aws_cloudformation_stack_set" "cfke-vpc" {
-  administration_role_arn = aws_iam_role.AWSCloudFormationStackSetAdministrationRole.arn
-  execution_role_name     = aws_iam_role.AWSCloudFormationStackSetExecutionRole.name
+  count                   = var.create_vpc ? 1 : 0
+  administration_role_arn = aws_iam_role.AWSCloudFormationStackSetAdministrationRole[0].arn
+  execution_role_name     = aws_iam_role.AWSCloudFormationStackSetExecutionRole[0].name
   name                    = "cfke-vpc-${var.cluster_id}"
 
   parameters = {
@@ -185,7 +194,7 @@ resource "aws_cloudformation_stack_set" "cfke-vpc" {
 
 resource "aws_cloudformation_stack_set_instance" "cfke-vpc" {
   depends_on     = [aws_iam_role_policy.AWSCloudFormationStackSetExecutionRole_MinimumExecutionPolicy]
-  for_each       = toset(data.aws_regions.all.names)
-  stack_set_name = aws_cloudformation_stack_set.cfke-vpc.name
+  for_each       = var.create_vpc ? toset(data.aws_regions.all[0].names) : toset([])
+  stack_set_name = aws_cloudformation_stack_set.cfke-vpc[0].name
   region         = each.key
 }
