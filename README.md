@@ -32,7 +32,7 @@ Please see the [AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/Use
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
 
 ## Inputs
 
