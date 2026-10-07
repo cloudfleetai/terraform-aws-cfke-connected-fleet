@@ -2,7 +2,7 @@ variable "control_plane_region" {
   description = "The CFKE control plane region of the cluster, as the Cloudfleet API and the Terraform provider report it (for example `europe-central-1a`)"
   type        = string
   validation {
-    condition     = contains(["staging", "staging-1a", "northamerica-central-1", "northamerica-central-1a", "europe-central-1a"], var.control_plane_region)
+    condition     = contains(["staging-1a", "northamerica-central-1a", "europe-central-1a"], var.control_plane_region)
     error_message = "The control plane region is not supported"
   }
 }
